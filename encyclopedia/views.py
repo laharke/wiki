@@ -1,3 +1,4 @@
+from turtle import title
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django import forms
@@ -5,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from . import util
-
+import random
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -78,10 +79,30 @@ def new_page(request):
             #aca lo que hag oes un redirect a la view entry_page y le paso el title como el name, arriba hice otra cosa porque no me salia en al funcion search, fixear maybe
             return redirect("entry_page", name=title)
 
-
-
     else:
         #render form to user so he can complete it and save the new entry
         return render(request, "encyclopedia/newpage.html", {
             "form": NewEntryForm()
         })
+
+def edit_entry(request):
+    #la idea es recibir un GET con el titulo del que tengo que editar, y poder mostrarlo en el html editentry mandole la info
+    if request.method == "GET":
+        title = request.GET['q']
+        content = util.get_entry(title)
+        return render(request, "encyclopedia/editentry.html", {
+            "title": title,
+            "content": content
+        })
+    if request.method == "POST":
+        title = request.POST['TitleToEdit']
+        newContent = request.POST['textarea2']
+        util.save_entry(title, newContent)
+        return redirect("entry_page", name=title)
+
+def random_page(request):
+    entries = util.list_entries()
+    length = len(entries)
+    n = random.randint(0,length)
+    entry = entries[n]
+    return redirect("entry_page", name=entry)

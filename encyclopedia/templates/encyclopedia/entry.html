@@ -11,5 +11,11 @@
         {{ entry }}
     </div>
 
+    <div>
+        <form action="{% url 'edit_entry' %}">
+            <input type="hidden" value="{{ title }}" name="q">
+            <input type="submit" value="Edit Entry" placeholder="Edit">
+        </form>
+    </div>
 {% endblock %}
 
