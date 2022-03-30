@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django import forms
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from . import util
 
@@ -52,4 +55,33 @@ def search(request):
             messages.error(request, 'Acá hay similares')
             return render(request, "encyclopedia/search.html", {
                 "entries": similarList,
+        })
+
+class NewEntryForm(forms.Form):
+    title = forms.CharField()
+    content = forms.CharField(widget=forms.Textarea())
+
+def new_page(request):
+    if request.method == "POST":
+        form = NewEntryForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            content = form.cleaned_data['content']
+            #Si el titulo ya existe, hay que devolver un error
+            entries = util.list_entries()
+            if title in entries:
+                messages.error(request, 'That entry alredy exists')
+                return redirect('/')
+            #ya guarde la info, call function to save to the computer
+            util.save_entry(title, content)
+            #ya se creo la entry, ahora redirect the user to the entry itself
+            #aca lo que hag oes un redirect a la view entry_page y le paso el title como el name, arriba hice otra cosa porque no me salia en al funcion search, fixear maybe
+            return redirect("entry_page", name=title)
+
+
+
+    else:
+        #render form to user so he can complete it and save the new entry
+        return render(request, "encyclopedia/newpage.html", {
+            "form": NewEntryForm()
         })
