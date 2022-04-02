@@ -7,6 +7,8 @@ from django.urls import reverse
 
 from . import util
 import random
+from markdown2 import Markdown
+
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -17,6 +19,9 @@ def entry_page(request, name):
     #necesito el NAME porque asi busco que quiero mostrar, basicamente en el path yo pongo str:name y el name del titulo va a ser lo que yo busque con al funcion
     if util.get_entry(name):
         markdown = util.get_entry(name)
+        #markdown to html conversion 
+        markdowner = Markdown()
+        markdown = markdowner.convert(markdown)
         return render(request, "encyclopedia/entry.html", {
             "entry": markdown,
             'title': name
@@ -36,6 +41,9 @@ def search(request):
         if util.get_entry(entry):
             markdown = util.get_entry(entry)
             print(markdown)
+            #markdown to html conversion 
+            markdowner = Markdown()
+            markdown = markdowner.convert(markdown)
             return render(request, "encyclopedia/entry.html", {
                 "entry": markdown,
                 'title': entry
@@ -90,6 +98,9 @@ def edit_entry(request):
     if request.method == "GET":
         title = request.GET['q']
         content = util.get_entry(title)
+        #markdown to html conversion 
+        markdowner = Markdown()
+        markdown = markdowner.convert(content)
         return render(request, "encyclopedia/editentry.html", {
             "title": title,
             "content": content
@@ -106,3 +117,4 @@ def random_page(request):
     n = random.randint(0,length)
     entry = entries[n]
     return redirect("entry_page", name=entry)
+
